@@ -4,6 +4,7 @@ const Chat = require("../models/chat");
 
 exports.handleChat = async (req, res) => {
   const { id } = req.params;
+  console.log(id, req?.userId, "id")
 
   if (!id) {
     return res.status(404).json({ message: "User does not Exists" });
@@ -12,13 +13,14 @@ exports.handleChat = async (req, res) => {
   try {
     let isChat = await Chat.find({
       $and: [
-        { users: { $elemMatch: { $eq: id } } },
         { users: { $elemMatch: { $eq: req?.userId } } },
+        { users: { $elemMatch: { $eq: id } } },
+        {isGroupChat: false},
       ],
     })
       .populate("users", "-password")
       .populate("latestMessage");
-
+console.log(isChat, "isChat");
     isChat = await User.populate(isChat, {
       path: "latestMessage.sender",
       select: "fullName email",
