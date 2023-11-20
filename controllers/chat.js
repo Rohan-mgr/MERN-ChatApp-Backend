@@ -14,6 +14,7 @@ exports.handleChat = async (req, res) => {
       $and: [
         { users: { $elemMatch: { $eq: id } } },
         { users: { $elemMatch: { $eq: req?.userId } } },
+        {isGroupChat: false},
       ],
     })
       .populate("users", "-password")
