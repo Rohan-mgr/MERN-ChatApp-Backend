@@ -1,4 +1,6 @@
 const {handledSetTimeout} = require("./utils");
+const crypto = require("crypto");
+const {postMessage} = require("../services/message.services");
 
 class Handlers {
     constructor(io, socket) {
@@ -34,17 +36,19 @@ class Handlers {
     }
 
     async messageSent(payload) {
-        console.log(payload, "messageSent", this._userInfo)
         const newMessage = {
+            _id: crypto.randomUUID(),
             sender: this._userInfo,
             content: payload?.message,
             chat: {_id: payload?.chatId},
-          };
-          console.log(newMessage);
-        return this._io.to(this._user).emit("save-message", {
+            updatedAt: new Date(),
+        };
+        this._io.emit("save-messsage", {
             action: "create",
             message: newMessage,
         });
+        
+        return await postMessage(payload?.message, payload?.chatId, this._user);
     }
 }
 

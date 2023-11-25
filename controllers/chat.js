@@ -14,10 +14,7 @@ exports.handleChat = async (req, res) => {
     let isChat = await Chat.find({
       $and: [
         { users: { $elemMatch: { $eq: req?.userId } } },
-<<<<<<< HEAD
-=======
         { users: { $elemMatch: { $eq: id } } },
->>>>>>> 124763f (solved one to one chat creation issue)
         {isGroupChat: false},
       ],
     })
