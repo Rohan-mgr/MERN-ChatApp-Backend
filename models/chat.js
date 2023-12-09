@@ -7,6 +7,10 @@ const chatSchema = new Schema(
       type: String,
       trim: true,
     },
+    groupId: {
+      type: String, 
+      trim: true,
+    },
     isGroupChat: {
       type: Boolean,
       default: false,

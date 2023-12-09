@@ -49,9 +49,7 @@ console.log(isChat, "isChat");
 };
 
 exports.createGroupChat = async (req, res) => {
-  // console.log(req?.user);
-  // res.end();
-  if (!req.body.users || !req.body.roomName) {
+  if (!req.body.users || !req.body.roomName || !req.body.roomId) {
     return res.status(400).send({ message: "Please Fill all the feilds" });
   }
 
@@ -68,6 +66,7 @@ exports.createGroupChat = async (req, res) => {
   try {
     const groupChat = await Chat.create({
       groupName: req.body.roomName,
+      groupId: req.body.roomId,
       users: users,
       isGroupChat: true,
       groupAdmin: req.user,
@@ -117,15 +116,15 @@ exports.fetchChats = async (req, res) => {
     // res.status(200).send(result);
 
     Chat.find({ users: { $elemMatch: { $eq: req.userId } } })
-      .populate("users", "-password")
-      .populate("groupAdmin", "-password")
-      .populate("latestMessage")
-      .sort({ updatedAt: -1 })
-      .then(async (results) => {
-        results = await User.populate(results, {
-          path: "latestMessage.sender",
-          select: "fullName email",
-        });
+    .populate("users", "-password")
+    .populate("groupAdmin", "-password")
+    .populate("latestMessage")
+    .sort({ updatedAt: -1 })
+    .then(async (results) => {
+      results = await User.populate(results, {
+        path: "latestMessage.sender",
+        select: "fullName email",
+      });
         res.status(200).send(results);
       });
   } catch (error) {
@@ -133,3 +132,16 @@ exports.fetchChats = async (req, res) => {
     res.status(200).json({ message: "Internal Server Error" });
   }
 };
+
+exports.fetchSingleChat = async function(chatId) {
+  try {
+    let chat = await Chat.findById(chatId);
+    if(!chat) {
+      throw new Error("Chat cannot be fetched");
+    }
+    return chat;
+  } catch(error) {
+    console.log(error, "Error from fetch single chat"); 
+    throw error;
+  }
+}
