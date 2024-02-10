@@ -25,5 +25,6 @@ module.exports = {
         "process": true
     },
     "rules": {
+        "no-prototype-builtins": "off",
     }
 }

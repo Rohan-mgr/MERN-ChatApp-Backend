@@ -2,7 +2,7 @@ const Message = require("../models/Message");
 const User = require("../models/user");
 const Chat = require("../models/chat");
 
-async function postMessage(message, chatId, userId) {
+async function postMessage(message, chatId, userId, attachment) {
     if (!message || !chatId) {
         // return res.status(400).send({ message: "Cannot send the message" });
         throw new Error("Cannot save message");
@@ -12,6 +12,7 @@ async function postMessage(message, chatId, userId) {
         sender: userId,
         content: message,
         chat: chatId,
+        attachment
       };
       try {
         let saveMessage = await Message.create(newMessage);

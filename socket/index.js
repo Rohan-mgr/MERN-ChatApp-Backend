@@ -32,19 +32,6 @@ exports.init = function (io) {
     socket.on("disconnect", withErrorHandler.bind(handlers.disconnect.bind(handlers)));
 
     socket.on("user:join", withErrorHandler.bind(handlers.userJoin.bind(handlers)));
-    // socket.on("user:getData", withErrorHandler.bind(handlers.userGetData.bind(handlers)));
-    // socket.on("user:setData", withErrorHandler.bind(handlers.userSetData.bind(handlers)));
-    // socket.on("user:setStatus", withErrorHandler.bind(handlers.userSetStatus.bind(handlers)));
-
-    // socket.on("livechat:request", withErrorHandler.bind(handlers.livechatRequest.bind(handlers)));
-
-    // socket.on("livechat:accept", withErrorHandler.bind(handlers.livechatAccept.bind(handlers)));
-    // socket.on("livechat:reject", withErrorHandler.bind(handlers.livechatReject.bind(handlers)));
-
-    // socket.on("livechat:transferRequest", withErrorHandler.bind(handlers.livechatTransferRequest.bind(handlers)));
-
-    // socket.on("livechat:end", withErrorHandler.bind(handlers.livechatEnd.bind(handlers)));
-    // socket.on("livechat:users", withErrorHandler.bind(handlers.livechatUsers.bind(handlers)));
 
     socket.on("message:sent", withErrorHandler.bind(handlers.messageSent.bind(handlers)));
   });

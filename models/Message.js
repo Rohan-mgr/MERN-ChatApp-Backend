@@ -11,6 +11,10 @@ const messageSchema = new Schema(
       type: String,
       trim: true,
     },
+    attachment: {
+      type: Object, 
+      default: null,
+    },
     chat: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Chat",

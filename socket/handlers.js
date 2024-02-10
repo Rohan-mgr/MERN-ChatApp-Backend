@@ -1,6 +1,8 @@
 const {handledSetTimeout} = require("./utils");
 const crypto = require("crypto");
 const {postMessage} = require("../services/message.services");
+const {firebasePostFile, isEmpty} = require("../utils/helper");
+
 
 class Handlers {
     constructor(io, socket) {
@@ -36,19 +38,31 @@ class Handlers {
     }
 
     async messageSent(payload) {
+        console.log(payload, "payload");
+        let attachment={}; 
+
+        if(payload?.file) {
+            attachment.fileUrl = await firebasePostFile(payload);
+            attachment.type = payload?.fileType;
+            attachment.name = payload?.fileName;
+        }
+
         const newMessage = {
             _id: crypto.randomUUID(),
             sender: this._userInfo,
             content: payload?.message,
             chat: {_id: payload?.chatId},
+            attachment: isEmpty(attachment) ? null : attachment,
             updatedAt: new Date(),
         };
         this._io.emit("save-messsage", {
             action: "create",
             message: newMessage,
         });
+
         
-        return await postMessage(payload?.message, payload?.chatId, this._user);
+        
+        return await postMessage(payload?.message, payload?.chatId, this._user, attachment);
     }
 }
 

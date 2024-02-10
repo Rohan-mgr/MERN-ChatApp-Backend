@@ -7,6 +7,8 @@ const userRouter = require("./routes/user.routes");
 const chatRouter = require("./routes/chat.routes");
 const messageRouter = require("./routes/message.routes");
 var debug = require('debug')('MERN-Chat-App:server');
+const firebaseConfig = require("./config/firebaseConfig"); 
+const {initializeApp} = require("firebase/app");
 
 // const socketIO = require("./socket");
 
@@ -14,6 +16,10 @@ const app = express();
 var server = require("http").Server(app);
 
 const port = process.env.PORT;
+
+//initialize firebase 
+initializeApp(firebaseConfig);
+
 
 //socket
 var io = require("socket.io")(server)
