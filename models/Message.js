@@ -10,6 +10,7 @@ const messageSchema = new Schema(
     content: {
       type: String,
       trim: true,
+      default: null,
     },
     attachment: {
       type: Object, 

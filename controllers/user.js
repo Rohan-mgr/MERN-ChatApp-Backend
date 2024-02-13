@@ -1,6 +1,7 @@
 const User = require("../models/user");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const { firebasePostFile } = require("../utils/helper");
 
 exports.createUser = async (req, res) => {
   const { fullName, email, password } = req.body;
@@ -55,9 +56,7 @@ exports.userLogin = async (req, res) => {
       }
     );
 
-    res
-      .status(200)
-      .json({ message: "Login Successfull", loggedInUser: user, token: token });
+    res.status(200).json({ message: "Login Successfull", loggedInUser: user, token: token });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal Server Error" });
@@ -71,9 +70,7 @@ exports.getAllUsers = async (req, res) => {
     if (!users) {
       return res.status(404).json({ message: "No Users Found" });
     }
-    res
-      .status(200)
-      .json({ message: "All Users Fetched Successfully", users: users });
+    res.status(200).json({ message: "All Users Fetched Successfully", users: users });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal Server Error" });
@@ -99,6 +96,28 @@ exports.searchUser = async (req, res) => {
       message: "All Users Fetched Successfully",
       users: searchResults,
     });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+exports.updateUserProfile = async (req, res) => {
+  const { userId } = req.body;
+  const file = req.file;
+
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "No User Found" });
+    }
+    console.log(user);
+    const profile = await firebasePostFile(file, true);
+
+    user.profileUrl = profile;
+    await user.save();
+
+    res.status(200).json({ message: "image uploaded successfully" });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal Server Error" });
