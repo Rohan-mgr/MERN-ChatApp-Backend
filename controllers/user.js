@@ -5,6 +5,7 @@ const { firebasePostFile } = require("../utils/helper");
 
 exports.createUser = async (req, res) => {
   const { fullName, email, password } = req.body;
+  const file = req.file;
 
   try {
     const existingUser = await User.findOne({ email: email });
@@ -14,11 +15,13 @@ exports.createUser = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 12);
+    const profile = (await firebasePostFile(file, true)) || null;
 
     const newUser = new User({
       fullName: fullName,
       email: email,
       password: hashedPassword,
+      profileUrl: profile,
     });
 
     await newUser.save();
@@ -66,7 +69,7 @@ exports.userLogin = async (req, res) => {
 exports.getAllUsers = async (req, res) => {
   // function for getting all users
   try {
-    const users = await User.find();
+    const users = await User.find().select("-password");
     if (!users) {
       return res.status(404).json({ message: "No Users Found" });
     }
@@ -107,7 +110,7 @@ exports.updateUserProfile = async (req, res) => {
   const file = req.file;
 
   try {
-    const user = await User.findById(userId);
+    const user = await User.findById(userId).select("-password");
     if (!user) {
       return res.status(404).json({ message: "No User Found" });
     }
@@ -117,7 +120,7 @@ exports.updateUserProfile = async (req, res) => {
     user.profileUrl = profile;
     await user.save();
 
-    res.status(200).json({ message: "image uploaded successfully" });
+    res.status(200).json({ message: "image uploaded successfully", updatedUser: user });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal Server Error" });
