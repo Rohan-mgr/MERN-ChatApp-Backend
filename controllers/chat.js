@@ -4,7 +4,7 @@ const Chat = require("../models/chat");
 
 exports.handleChat = async (req, res) => {
   const { id } = req.params;
-  console.log(id, req?.userId, "id")
+  console.log(id, req?.userId, "id");
 
   if (!id) {
     return res.status(404).json({ message: "User does not Exists" });
@@ -15,12 +15,12 @@ exports.handleChat = async (req, res) => {
       $and: [
         { users: { $elemMatch: { $eq: req?.userId } } },
         { users: { $elemMatch: { $eq: id } } },
-        {isGroupChat: false},
+        { isGroupChat: false },
       ],
     })
       .populate("users", "-password")
       .populate("latestMessage");
-console.log(isChat, "isChat");
+    console.log(isChat, "isChat");
     isChat = await User.populate(isChat, {
       path: "latestMessage.sender",
       select: "fullName email",
@@ -36,10 +36,7 @@ console.log(isChat, "isChat");
       };
 
       const createChat = await Chat.create(chatData);
-      const fullChat = await Chat.findOne({ _id: createChat?._id }).populate(
-        "users",
-        "-password"
-      );
+      const fullChat = await Chat.findOne({ _id: createChat?._id }).populate("users", "-password");
       res.status(200).send(fullChat);
     }
   } catch (error) {
@@ -56,9 +53,7 @@ exports.createGroupChat = async (req, res) => {
   var users = req.body.users;
 
   if (users.length < 2) {
-    return res
-      .status(400)
-      .send("More than 2 users are required to form a group chat");
+    return res.status(400).send("More than 2 users are required to form a group chat");
   }
 
   users.push(req?.userId);
@@ -84,48 +79,23 @@ exports.createGroupChat = async (req, res) => {
 };
 
 exports.fetchChats = async (req, res) => {
+  const { id } = req.params;
+
   try {
-    // const latestChatUser = await Chat.find()
-    //   .sort({ updatedAt: -1 })
-    //   .populate("users", "-password");
-    // const reply = await client.get(req?.userId);
-    // const exist = JSON.parse(reply)?.some(
-    //   (item) =>
-    //     item.users[0]?._id.toString() ===
-    //     latestChatUser[0]?.users[0]?._id.toString()
-    // );
-    // if (exist) {
-    //   console.log("form cached");
-    //   res.status(200).send(JSON.parse(reply));
-    //   return;
-    // }
-
-    // console.log(req?.userId);
-    // const chats = await Chat.find({
-    //   users: { $elemMatch: { $eq: req?.userId } },
-    // })
-    //   .populate("users", "-password")
-    //   .populate("groupAdmin", "-password")
-    //   .populate("latestMessage")
-    //   .sort({ updatedAt: -1 });
-
-    // const result = await User.populate(chats, {
-    //   path: "lastesMessage.sender",
-    // });
-    // await client.set(req?.userId, JSON.stringify(result));
-    // res.status(200).send(result);
-
-    Chat.find({ users: { $elemMatch: { $eq: req.userId } } })
-    .populate("users", "-password")
-    .populate("groupAdmin", "-password")
-    .populate("latestMessage")
-    .sort({ updatedAt: -1 })
-    .then(async (results) => {
-      results = await User.populate(results, {
-        path: "latestMessage.sender",
-        select: "fullName email",
-      });
-        res.status(200).send(results);
+    if (id == 0) {
+      return res.status(200).send([]);
+    }
+    Chat.find({ users: { $elemMatch: { $eq: id || req.userId } } })
+      .populate("users", "-password")
+      .populate("groupAdmin", "-password")
+      .populate("latestMessage")
+      .sort({ updatedAt: -1 })
+      .then(async (results) => {
+        results = await User.populate(results, {
+          path: "latestMessage.sender",
+          select: "fullName email",
+        });
+        return res.status(200).send(results);
       });
   } catch (error) {
     console.log(error);
@@ -133,15 +103,15 @@ exports.fetchChats = async (req, res) => {
   }
 };
 
-exports.fetchSingleChat = async function(chatId) {
+exports.fetchSingleChat = async function (chatId) {
   try {
     let chat = await Chat.findById(chatId);
-    if(!chat) {
+    if (!chat) {
       throw new Error("Chat cannot be fetched");
     }
     return chat;
-  } catch(error) {
-    console.log(error, "Error from fetch single chat"); 
+  } catch (error) {
+    console.log(error, "Error from fetch single chat");
     throw error;
   }
-}
+};
