@@ -27,7 +27,22 @@ exports.handleChat = async (req, res) => {
     });
 
     if (isChat.length > 0) {
-      throw new Error("Chat already exists");
+      console.log(isChat, "isChat>>>>>>");
+
+      Chat.find({ users: { $elemMatch: { $eq: req.userId } } })
+        .populate("users", "-password")
+        .populate("groupAdmin", "-password")
+        .populate("latestMessage")
+        .sort({ updatedAt: -1 })
+        .then(async (results) => {
+          results = await User.populate(results, {
+            path: "latestMessage.sender",
+            select: "fullName email",
+          });
+          return res.status(200).json({ isExistedChat: true, chatId: isChat[0]?._id, fullChat: results });
+        });
+
+      // throw new Error("Chat already exists");
     } else {
       const chatData = {
         groupName: "one to one chat",
@@ -37,7 +52,7 @@ exports.handleChat = async (req, res) => {
 
       const createChat = await Chat.create(chatData);
       const fullChat = await Chat.findOne({ _id: createChat?._id }).populate("users", "-password");
-      res.status(200).send(fullChat);
+      res.status(200).json({ fullChat, isExistedChat: false });
     }
   } catch (error) {
     console.log(error);
@@ -46,7 +61,7 @@ exports.handleChat = async (req, res) => {
 };
 
 exports.createGroupChat = async (req, res) => {
-  if (!req.body.users || !req.body.roomName || !req.body.roomId) {
+  if (!req.body.users || !req.body.roomId) {
     return res.status(400).send({ message: "Please Fill all the feilds" });
   }
 
