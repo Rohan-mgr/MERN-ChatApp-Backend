@@ -10,6 +10,7 @@ var debug = require("debug")("MERN-Chat-App:server");
 const firebaseConfig = require("./config/firebaseConfig");
 const { initializeApp } = require("firebase/app");
 const multer = require("multer");
+const cors = require("cors");
 
 // const socketIO = require("./socket");
 
@@ -28,6 +29,13 @@ var io = require("socket.io")(server);
 
 app.use(helmet());
 app.use(express.urlencoded({ extended: false }));
+
+var corsOptions = {
+  origin: process.env.CLIENT_URL,
+  optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+};
+
+app.use(cors(corsOptions));
 app.use(bodyParser.json());
 
 const { init } = require("./socket");
