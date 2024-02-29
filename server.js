@@ -56,6 +56,12 @@ app.use("/api/user", userRouter);
 app.use("/api/chat", chatRouter);
 app.use("/api/message", messageRouter);
 
+app.get("*", (req, res, next) => {
+  res.status(200).json({
+    message: "bad request",
+  });
+});
+
 mongoose
   .connect(process.env.MONGODB_CONNECTION_STRING)
   .then(() => {
